@@ -109,15 +109,15 @@ export default class Bar {
     }
 
     draw_label() {
-        createSVG('text', {
-            x: this.x + this.width / 2,
-            y: this.y + this.height / 2,
-            innerHTML: this.task.name,
-            class: 'bar-label',
-            append_to: this.bar_group,
-        });
+        // createSVG('text', {
+        //     x: this.x + this.width / 2,
+        //     y: this.y + this.height / 2,
+        //     innerHTML: this.task.name,
+        //     class: 'bar-label',
+        //     append_to: this.bar_group,
+        // });
         // labels get BBox in the next tick
-        requestAnimationFrame(() => this.update_label_position());
+        // requestAnimationFrame(() => this.update_label_position());
     }
 
     draw_resize_handles() {

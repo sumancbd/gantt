@@ -166,3 +166,8 @@ $handle-color: #ddd !default;
 		}
 	}
 }
+.shrink {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}

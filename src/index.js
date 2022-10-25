@@ -17,9 +17,9 @@ const VIEW_MODE = {
 
 export default class Gantt {
     constructor(wrapper, tasks, options) {
-        this.setup_wrapper(wrapper);
         this.setup_options(options);
         this.setup_tasks(tasks);
+        this.setup_wrapper(wrapper);
         // initialize with default view mode
         this.change_view_mode();
         this.bind_events();
@@ -32,6 +32,8 @@ export default class Gantt {
         if (typeof element === 'string') {
             element = document.querySelector(element);
         }
+
+        const ganttTarget = document.querySelector('.gantt-target');
 
         // get the SVGElement
         if (element instanceof HTMLElement) {
@@ -61,15 +63,64 @@ export default class Gantt {
         // wrapper element
         this.$container = document.createElement('div');
         this.$container.classList.add('gantt-container');
+        this.$container.style.display = 'flex';
 
-        const parent_element = this.$svg.parentElement;
+        // add left column
+        this.left_column = document.createElement('div');
+        this.left_column.style.width = `${this.options.left_col_width}px`;
+        // this.left_column.style.background = 'red';
+        this.left_column.classList.add('left-column-wrapper');
+        this.$container.appendChild(this.left_column);
+
+        // create chart container
+        this.$chartContainer = document.createElement('div');
+        this.$chartContainer.style.flex = '1';
+        this.$chartContainer.style.overflowX = 'scroll';
+        this.$container.appendChild(this.$chartContainer);
+
+        const parent_element = ganttTarget;
         parent_element.appendChild(this.$container);
-        this.$container.appendChild(this.$svg);
+        this.$chartContainer.appendChild(this.$svg);
 
         // popup wrapper
         this.popup_wrapper = document.createElement('div');
         this.popup_wrapper.classList.add('popup-wrapper');
         this.$container.appendChild(this.popup_wrapper);
+
+        this.create_labels();
+    }
+
+    create_labels() {
+        const topElem = document.createElement('div');
+        topElem.style.background = '#ffffff';
+        topElem.style.height = `${this.options.header_height + 8.4}px`;
+        topElem.style.borderTop = '1px solid #ebeff2';
+        this.left_column.appendChild(topElem);
+
+        this.tasks.forEach((task, i) => {
+            const sl = i + 1;
+
+            const tElem = document.createElement('div');
+            tElem.style.background = sl % 2 === 0 ? '#f5f5f5' : '#ffffff';
+            const row_height =
+                this.options.bar_height + this.options.padding - 1;
+            tElem.style.height = `${row_height}px`;
+            if (sl === 1) {
+                tElem.style.borderTop = '2px solid #e0e0e0';
+                tElem.style.height = `${row_height - 1.1}px`;
+            }
+            tElem.style.borderBottom = '1px solid #ebeff2';
+            tElem.style.display = 'flex';
+            tElem.style.alignItems = 'center';
+            tElem.style.paddingLeft = '9px';
+            tElem.setAttribute('title', task.name);
+            this.left_column.appendChild(tElem);
+
+            const pElm = document.createElement('p');
+            pElm.textContent = task.name;
+            pElm.classList.add('shrink');
+            tElem.appendChild(pElm);
+        });
     }
 
     setup_options(options) {
@@ -87,6 +138,7 @@ export default class Gantt {
             popup_trigger: 'click',
             custom_popup_html: null,
             language: 'en',
+            left_col_width: 100,
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -319,7 +371,7 @@ export default class Gantt {
         });
 
         $.attr(this.$svg, {
-            height: grid_height + this.options.padding + 100,
+            height: grid_height,
             width: '100%',
         });
     }
