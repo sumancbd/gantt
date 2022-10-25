@@ -93,7 +93,7 @@ export default class Gantt {
     create_labels() {
         const topElem = document.createElement('div');
         topElem.style.background = '#ffffff';
-        topElem.style.height = `${this.options.header_height + 8.4}px`;
+        topElem.style.height = `${this.options.header_height + 10}px`;
         topElem.style.borderTop = '1px solid #ebeff2';
         this.left_column.appendChild(topElem);
 
@@ -102,12 +102,10 @@ export default class Gantt {
 
             const tElem = document.createElement('div');
             tElem.style.background = sl % 2 === 0 ? '#f5f5f5' : '#ffffff';
-            const row_height =
-                this.options.bar_height + this.options.padding - 1;
+            const row_height = this.options.bar_height + this.options.padding;
             tElem.style.height = `${row_height}px`;
             if (sl === 1) {
                 tElem.style.borderTop = '2px solid #e0e0e0';
-                tElem.style.height = `${row_height - 1.1}px`;
             }
             tElem.style.borderBottom = '1px solid #ebeff2';
             tElem.style.display = 'flex';
