@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<title>Simple Gantt</title>
@@ -8,10 +9,12 @@
 			font-family: sans-serif;
 			background: #ccc;
 		}
+
 		.container {
 			width: 80%;
 			margin: 0 auto;
 		}
+
 		/* custom class */
 		.gantt .bar-milestone .bar {
 			fill: tomato;
@@ -20,6 +23,7 @@
 	<link rel="stylesheet" href="dist/frappe-gantt.css" />
 	<script src="dist/frappe-gantt.js"></script>
 </head>
+
 <body>
 	<div class="container">
 		<h2>Interactive Gantt Chart entirely made in SVG!</h2>
@@ -87,14 +91,17 @@
 			on_click: function (task) {
 				console.log(task);
 			},
-			on_date_change: function(task, start, end) {
+			on_date_change: function (task, start, end) {
 				console.log(task, start, end);
 			},
-			on_progress_change: function(task, progress) {
+			on_progress_change: function (task, progress) {
 				console.log(task, progress);
 			},
-			on_view_change: function(mode) {
+			on_view_change: function (mode) {
 				console.log(mode);
+			},
+			on_label_click: function (task) {
+				console.log({ task });
 			},
 			view_mode: 'Day',
 			language: 'en',
@@ -103,4 +110,5 @@
 		console.log(gantt_chart);
 	</script>
 </body>
+
 </html>

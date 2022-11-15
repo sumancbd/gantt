@@ -1120,8 +1120,9 @@ var Gantt = (function () {
 
         create_labels() {
             const topElem = document.createElement('div');
+            this.left_column.innerHTML = '';
             topElem.style.background = '#ffffff';
-            topElem.style.height = `${this.options.header_height + 10}px`;
+            topElem.style.height = `${this.options.header_height + 9.3}px`;
             topElem.style.borderTop = '1px solid #ebeff2';
             this.left_column.appendChild(topElem);
 
@@ -1129,6 +1130,10 @@ var Gantt = (function () {
                 const sl = i + 1;
 
                 const tElem = document.createElement('div');
+                tElem.addEventListener('click', () => {
+                    this.options.on_label_click(task);
+                });
+                tElem.style.cursor = 'pointer';
                 tElem.style.background = sl % 2 === 0 ? '#f5f5f5' : '#ffffff';
                 const row_height = this.options.bar_height + this.options.padding;
                 tElem.style.height = `${row_height}px`;
@@ -1247,6 +1252,7 @@ var Gantt = (function () {
         refresh(tasks) {
             this.setup_tasks(tasks);
             this.change_view_mode();
+            this.create_labels();
         }
 
         change_view_mode(mode = this.options.view_mode) {

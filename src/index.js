@@ -102,6 +102,10 @@ export default class Gantt {
             const sl = i + 1;
 
             const tElem = document.createElement('div');
+            tElem.addEventListener('click', () => {
+                this.options.on_label_click(task);
+            });
+            tElem.style.cursor = 'pointer';
             tElem.style.background = sl % 2 === 0 ? '#f5f5f5' : '#ffffff';
             const row_height = this.options.bar_height + this.options.padding;
             tElem.style.height = `${row_height}px`;
