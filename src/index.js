@@ -187,7 +187,7 @@ export default class Gantt {
                 i.show = action === 'expand';
             }
         });
-        this.refresh(tasks);
+        this.refresh(this.tasks);
     }
 
     collapseChild(itemId) {
