@@ -1135,20 +1135,6 @@ var Gantt = (function () {
                 tElem.setAttribute('expanded', true);
                 tElem.addEventListener('click', () => {
                     this.options.on_label_click(task);
-                    // const itemId = tElem.getAttribute('id').replace('item-', '');
-                    const mTaskIndex = this.tasks.findIndex(
-                        (i) => i.id === task.id
-                    );
-                    this.tasks[mTaskIndex].collapsed =
-                        !this.tasks[mTaskIndex].collapsed;
-                    if (this.tasks[mTaskIndex].collapsed) {
-                        this.collapseChild(task.id);
-                    } else {
-                        this.expandChild(task.id);
-                    }
-                });
-                tElem.addEventListener('click', () => {
-                    this.options.on_label_click(task);
                 });
                 tElem.style.cursor = 'pointer';
                 tElem.style.background = sl % 2 === 0 ? '#f5f5f5' : '#ffffff';
@@ -1165,7 +1151,25 @@ var Gantt = (function () {
                 this.left_column.appendChild(tElem);
 
                 const pElm = document.createElement('p');
-                const iconElem = document.createElement('span');
+                const iconElem = document.createElement('button');
+                iconElem.style.cursor = 'pointer';
+                iconElem.style.border = 'none';
+                iconElem.style.backgroundColor = 'transparent';
+                iconElem.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.options.on_label_click(task);
+                    // const itemId = tElem.getAttribute('id').replace('item-', '');
+                    const mTaskIndex = this.tasks.findIndex(
+                        (i) => i.id === task.id
+                    );
+                    this.tasks[mTaskIndex].collapsed =
+                        !this.tasks[mTaskIndex].collapsed;
+                    if (this.tasks[mTaskIndex].collapsed) {
+                        this.collapseChild(task.id);
+                    } else {
+                        this.expandChild(task.id);
+                    }
+                });
                 const textElem = document.createElement('span');
                 iconElem.innerHTML = task.collapsed
                     ? this.options.collapsedIcon
