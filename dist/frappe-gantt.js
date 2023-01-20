@@ -497,6 +497,7 @@ var Gantt = (function () {
             this.group = createSVG('g', {
                 class: 'bar-wrapper ' + (this.task.custom_class || ''),
                 'data-id': this.task.id,
+                id: `bar-${this.task.id}`,
             });
             this.bar_group = createSVG('g', {
                 class: 'bar-group',
@@ -1126,11 +1127,26 @@ var Gantt = (function () {
             topElem.style.borderTop = '1px solid #ebeff2';
             this.left_column.appendChild(topElem);
 
-            this.tasks.forEach((task, i) => {
-                console.log(task.depth || 0);
+            this.tasksFiltered.forEach((task, i) => {
                 const sl = i + 1;
 
                 const tElem = document.createElement('div');
+                tElem.id = `item-${task.id}`;
+                tElem.setAttribute('expanded', true);
+                tElem.addEventListener('click', () => {
+                    this.options.on_label_click(task);
+                    // const itemId = tElem.getAttribute('id').replace('item-', '');
+                    const mTaskIndex = this.tasks.findIndex(
+                        (i) => i.id === task.id
+                    );
+                    this.tasks[mTaskIndex].collapsed =
+                        !this.tasks[mTaskIndex].collapsed;
+                    if (this.tasks[mTaskIndex].collapsed) {
+                        this.collapseChild(task.id);
+                    } else {
+                        this.expandChild(task.id);
+                    }
+                });
                 tElem.addEventListener('click', () => {
                     this.options.on_label_click(task);
                 });
@@ -1149,13 +1165,61 @@ var Gantt = (function () {
                 this.left_column.appendChild(tElem);
 
                 const pElm = document.createElement('p');
-                pElm.innerHTML = task.name;
+                const iconElem = document.createElement('span');
+                const textElem = document.createElement('span');
+                iconElem.innerHTML = task.collapsed
+                    ? this.options.collapsedIcon
+                    : this.options.expandIcon;
+                textElem.innerHTML = task.name;
+                textElem.style.marginLeft = '5px';
                 pElm.style.marginLeft = `${
                 (task.depth || 0) * (this.options.indentationPixels || 30)
             }px`;
+                pElm.style.display = 'flex';
+                pElm.style.alignItems = 'center';
+                pElm.appendChild(iconElem);
+                pElm.appendChild(textElem);
                 pElm.classList.add('shrink');
                 tElem.appendChild(pElm);
             });
+        }
+
+        getChildItems(task, childItems, action) {
+            const itemChild = this.tasks.filter(
+                (item) => item.dependencies[0] === task.id
+            );
+            childItems.push(...itemChild);
+
+            if (itemChild.length) {
+                itemChild
+                    .filter((cItem) =>
+                        action === 'expand' ? cItem.collapsed === false : true
+                    )
+                    .forEach((cItem) => {
+                        this.getChildItems(cItem, childItems, action);
+                    });
+            }
+        }
+
+        toggleItems(itemId, action) {
+            const task = this.tasks.find((i) => i.id === itemId);
+            let childItems = [];
+            this.getChildItems(task, childItems, action);
+
+            childItems = childItems.map((item) => item.id);
+            this.tasks.forEach((i) => {
+                if (childItems.includes(i.id)) {
+                    i.show = action === 'expand';
+                }
+            });
+            this.refresh(tasks);
+        }
+
+        collapseChild(itemId) {
+            this.toggleItems(itemId, 'collapse');
+        }
+        expandChild(itemId) {
+            this.toggleItems(itemId, 'expand');
         }
 
         setup_options(options) {
@@ -1237,15 +1301,30 @@ var Gantt = (function () {
                     task.id = generate_id(task);
                 }
 
+                if (task.show === undefined) {
+                    if (task.depth === 0) {
+                        task.show = true;
+                    }
+                }
+                if (task.collapsed === undefined) {
+                    task.collapsed = true;
+                }
+
+                // task.collapsed =
+                //     task.collapsed === undefined ? false : task.collapsed;
+                // task.show = task.show === undefined ? true : task.show;
+
                 return task;
             });
+
+            this.tasksFiltered = this.tasks.filter((item) => item.show);
 
             this.setup_dependencies();
         }
 
         setup_dependencies() {
             this.dependency_map = {};
-            for (let t of this.tasks) {
+            for (let t of this.tasksFiltered) {
                 for (let d of t.dependencies) {
                     this.dependency_map[d] = this.dependency_map[d] || [];
                     this.dependency_map[d].push(t.id);
@@ -1299,7 +1378,7 @@ var Gantt = (function () {
         setup_gantt_dates() {
             this.gantt_start = this.gantt_end = null;
 
-            for (let task of this.tasks) {
+            for (let task of this.tasksFiltered) {
                 // set global start and end date
                 if (!this.gantt_start || task._start < this.gantt_start) {
                     this.gantt_start = task._start;
@@ -1395,7 +1474,7 @@ var Gantt = (function () {
                 this.options.header_height +
                 this.options.padding +
                 (this.options.bar_height + this.options.padding) *
-                    this.tasks.length;
+                    this.tasksFiltered.length;
 
             createSVG('rect', {
                 x: 0,
@@ -1421,7 +1500,7 @@ var Gantt = (function () {
 
             let row_y = this.options.header_height + this.options.padding / 2;
 
-            for (let task of this.tasks) {
+            for (let task of this.tasksFiltered) {
                 createSVG('rect', {
                     x: 0,
                     y: row_y,
@@ -1462,7 +1541,7 @@ var Gantt = (function () {
             let tick_y = this.options.header_height + this.options.padding / 2;
             let tick_height =
                 (this.options.bar_height + this.options.padding) *
-                this.tasks.length;
+                this.tasksFiltered.length;
 
             for (let date of this.dates) {
                 let tick_class = 'tick';
@@ -1515,7 +1594,7 @@ var Gantt = (function () {
                 const width = this.options.column_width;
                 const height =
                     (this.options.bar_height + this.options.padding) *
-                        this.tasks.length +
+                        this.tasksFiltered.length +
                     this.options.header_height +
                     this.options.padding / 2;
 
@@ -1658,7 +1737,7 @@ var Gantt = (function () {
         }
 
         make_bars() {
-            this.bars = this.tasks.map((task) => {
+            this.bars = this.tasksFiltered.map((task) => {
                 const bar = new Bar(this, task);
                 this.layers.bar.appendChild(bar.group);
                 return bar;
@@ -1667,7 +1746,7 @@ var Gantt = (function () {
 
         make_arrows() {
             this.arrows = [];
-            for (let task of this.tasks) {
+            for (let task of this.tasksFiltered) {
                 let arrows = [];
                 arrows = task.dependencies
                     .map((task_id) => {
@@ -1960,7 +2039,7 @@ var Gantt = (function () {
         }
 
         get_task(id) {
-            return this.tasks.find((task) => {
+            return this.tasksFiltered.find((task) => {
                 return task.id === id;
             });
         }
@@ -1998,7 +2077,7 @@ var Gantt = (function () {
          * @memberof Gantt
          */
         get_oldest_starting_date() {
-            return this.tasks
+            return this.tasksFiltered
                 .map((task) => task._start)
                 .reduce((prev_date, cur_date) =>
                     cur_date <= prev_date ? cur_date : prev_date

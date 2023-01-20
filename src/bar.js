@@ -37,6 +37,7 @@ export default class Bar {
         this.group = createSVG('g', {
             class: 'bar-wrapper ' + (this.task.custom_class || ''),
             'data-id': this.task.id,
+            id: `bar-${this.task.id}`,
         });
         this.bar_group = createSVG('g', {
             class: 'bar-group',
