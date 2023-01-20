@@ -1156,9 +1156,8 @@ var Gantt = (function () {
                 iconElem.style.border = 'none';
                 iconElem.style.backgroundColor = 'transparent';
                 iconElem.addEventListener('click', (e) => {
+                    console.log('e', e);
                     e.stopPropagation();
-                    this.options.on_label_click(task);
-                    // const itemId = tElem.getAttribute('id').replace('item-', '');
                     const mTaskIndex = this.tasks.findIndex(
                         (i) => i.id === task.id
                     );
