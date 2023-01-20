@@ -99,6 +99,7 @@ export default class Gantt {
         this.left_column.appendChild(topElem);
 
         this.tasks.forEach((task, i) => {
+            console.log(task.depth || 0);
             const sl = i + 1;
 
             const tElem = document.createElement('div');
@@ -120,7 +121,10 @@ export default class Gantt {
             this.left_column.appendChild(tElem);
 
             const pElm = document.createElement('p');
-            pElm.textContent = task.name;
+            pElm.innerHTML = task.name;
+            pElm.style.marginLeft = `${
+                (task.depth || 0) * (this.options.indentationPixels || 30)
+            }px`;
             pElm.classList.add('shrink');
             tElem.appendChild(pElm);
         });
