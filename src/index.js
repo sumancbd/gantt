@@ -138,6 +138,8 @@ export default class Gantt {
                     : this.options.expandIcon;
             }
             const textElem = document.createElement('span');
+            const flagIconElem = document.createElement('span');
+            flagIconElem.innerHTML = this.options.flagIcon;
             textElem.innerHTML = task.name;
             textElem.style.marginLeft = '5px';
             pElm.style.marginLeft = `${
@@ -156,6 +158,9 @@ export default class Gantt {
             }
             if (task.hasChildren) {
                 pElm.appendChild(iconElem);
+            }
+            if (task.flagged) {
+                pElm.appendChild(flagIconElem);
             }
             pElm.appendChild(textElem);
             pElm.classList.add('shrink');
