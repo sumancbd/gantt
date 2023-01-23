@@ -98,7 +98,7 @@ export default class Gantt {
         topElem.style.borderTop = '1px solid #ebeff2';
         this.left_column.appendChild(topElem);
 
-        this.tasksFiltered.forEach((task, i) => {
+        this.tasks.forEach((task, i) => {
             const sl = i + 1;
 
             const tElem = document.createElement('div');
@@ -123,29 +123,21 @@ export default class Gantt {
 
             const pElm = document.createElement('p');
             const iconElem = document.createElement('button');
-            iconElem.style.cursor = 'pointer';
-            iconElem.style.border = 'none';
-            iconElem.style.backgroundColor = 'transparent';
-            iconElem.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.options.on_click_expand_toggle(
-                    this.tasks.find((i) => i.id === task.id)
-                );
-                // const mTaskIndex = this.tasks.findIndex(
-                //     (i) => i.id === task.id
-                // );
-                // this.tasks[mTaskIndex].collapsed =
-                //     !this.tasks[mTaskIndex].collapsed;
-                // if (this.tasks[mTaskIndex].collapsed) {
-                //     this.collapseChild(task.id);
-                // } else {
-                //     this.expandChild(task.id);
-                // }
-            });
+            if (task.hasChildren) {
+                iconElem.style.cursor = 'pointer';
+                iconElem.style.border = 'none';
+                iconElem.style.backgroundColor = 'transparent';
+                iconElem.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.options.on_click_expand_toggle(
+                        this.tasks.find((i) => i.id === task.id)
+                    );
+                });
+                iconElem.innerHTML = task.collapsed
+                    ? this.options.collapsedIcon
+                    : this.options.expandIcon;
+            }
             const textElem = document.createElement('span');
-            iconElem.innerHTML = task.collapsed
-                ? this.options.collapsedIcon
-                : this.options.expandIcon;
             textElem.innerHTML = task.name;
             textElem.style.marginLeft = '5px';
             pElm.style.marginLeft = `${
@@ -153,49 +145,13 @@ export default class Gantt {
             }px`;
             pElm.style.display = 'flex';
             pElm.style.alignItems = 'center';
-            pElm.appendChild(iconElem);
+            if (task.hasChildren) {
+                pElm.appendChild(iconElem);
+            }
             pElm.appendChild(textElem);
             pElm.classList.add('shrink');
             tElem.appendChild(pElm);
         });
-    }
-
-    getChildItems(task, childItems, action) {
-        const itemChild = this.tasks.filter(
-            (item) => item.dependencies[0] === task.id
-        );
-        childItems.push(...itemChild);
-
-        if (itemChild.length) {
-            itemChild
-                .filter((cItem) =>
-                    action === 'expand' ? cItem.collapsed === false : true
-                )
-                .forEach((cItem) => {
-                    this.getChildItems(cItem, childItems, action);
-                });
-        }
-    }
-
-    toggleItems(itemId, action) {
-        const task = this.tasks.find((i) => i.id === itemId);
-        let childItems = [];
-        this.getChildItems(task, childItems, action);
-
-        childItems = childItems.map((item) => item.id);
-        this.tasks.forEach((i) => {
-            if (childItems.includes(i.id)) {
-                i.show = action === 'expand';
-            }
-        });
-        this.refresh(this.tasks);
-    }
-
-    collapseChild(itemId) {
-        this.toggleItems(itemId, 'collapse');
-    }
-    expandChild(itemId) {
-        this.toggleItems(itemId, 'expand');
     }
 
     setup_options(options) {
@@ -285,22 +241,18 @@ export default class Gantt {
             if (task.collapsed === undefined) {
                 task.collapsed = true;
             }
-
-            // task.collapsed =
-            //     task.collapsed === undefined ? false : task.collapsed;
-            // task.show = task.show === undefined ? true : task.show;
+            task.hasChildren =
+                task.hasChildren === undefined ? false : task.hasChildren;
 
             return task;
         });
-
-        this.tasksFiltered = this.tasks;
 
         this.setup_dependencies();
     }
 
     setup_dependencies() {
         this.dependency_map = {};
-        for (let t of this.tasksFiltered) {
+        for (let t of this.tasks) {
             for (let d of t.dependencies) {
                 this.dependency_map[d] = this.dependency_map[d] || [];
                 this.dependency_map[d].push(t.id);
@@ -354,7 +306,7 @@ export default class Gantt {
     setup_gantt_dates() {
         this.gantt_start = this.gantt_end = null;
 
-        for (let task of this.tasksFiltered) {
+        for (let task of this.tasks) {
             // set global start and end date
             if (!this.gantt_start || task._start < this.gantt_start) {
                 this.gantt_start = task._start;
@@ -450,7 +402,7 @@ export default class Gantt {
             this.options.header_height +
             this.options.padding +
             (this.options.bar_height + this.options.padding) *
-                this.tasksFiltered.length;
+                this.tasks.length;
 
         createSVG('rect', {
             x: 0,
@@ -476,7 +428,7 @@ export default class Gantt {
 
         let row_y = this.options.header_height + this.options.padding / 2;
 
-        for (let task of this.tasksFiltered) {
+        for (let task of this.tasks) {
             createSVG('rect', {
                 x: 0,
                 y: row_y,
@@ -517,7 +469,7 @@ export default class Gantt {
         let tick_y = this.options.header_height + this.options.padding / 2;
         let tick_height =
             (this.options.bar_height + this.options.padding) *
-            this.tasksFiltered.length;
+            this.tasks.length;
 
         for (let date of this.dates) {
             let tick_class = 'tick';
@@ -570,7 +522,7 @@ export default class Gantt {
             const width = this.options.column_width;
             const height =
                 (this.options.bar_height + this.options.padding) *
-                    this.tasksFiltered.length +
+                    this.tasks.length +
                 this.options.header_height +
                 this.options.padding / 2;
 
@@ -713,7 +665,7 @@ export default class Gantt {
     }
 
     make_bars() {
-        this.bars = this.tasksFiltered.map((task) => {
+        this.bars = this.tasks.map((task) => {
             const bar = new Bar(this, task);
             this.layers.bar.appendChild(bar.group);
             return bar;
@@ -722,7 +674,7 @@ export default class Gantt {
 
     make_arrows() {
         this.arrows = [];
-        for (let task of this.tasksFiltered) {
+        for (let task of this.tasks) {
             let arrows = [];
             arrows = task.dependencies
                 .map((task_id) => {
@@ -1015,7 +967,7 @@ export default class Gantt {
     }
 
     get_task(id) {
-        return this.tasksFiltered.find((task) => {
+        return this.tasks.find((task) => {
             return task.id === id;
         });
     }
@@ -1053,7 +1005,7 @@ export default class Gantt {
      * @memberof Gantt
      */
     get_oldest_starting_date() {
-        return this.tasksFiltered
+        return this.tasks
             .map((task) => task._start)
             .reduce((prev_date, cur_date) =>
                 cur_date <= prev_date ? cur_date : prev_date
