@@ -277,14 +277,8 @@ export default class Gantt {
                 task.id = generate_id(task);
             }
 
-            if (task.show === undefined) {
-                if (task.depth === 0) {
-                    task.show = true;
-                }
-            }
-            if (task.collapsed === undefined) {
-                task.collapsed = true;
-            }
+            task.show = true;
+            task.collapsed = true;
 
             // task.collapsed =
             //     task.collapsed === undefined ? false : task.collapsed;
