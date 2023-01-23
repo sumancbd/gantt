@@ -1174,6 +1174,15 @@ var Gantt = (function () {
             }px`;
                 pElm.style.display = 'flex';
                 pElm.style.alignItems = 'center';
+
+                if (
+                    typeof this.options.labelStyle === 'object' &&
+                    this.options.labelStyle !== null
+                ) {
+                    Object.keys(this.options.labelStyle).forEach((style) => {
+                        pElm.style[style] = this.options.labelStyle[style];
+                    });
+                }
                 if (task.hasChildren) {
                     pElm.appendChild(iconElem);
                 }
