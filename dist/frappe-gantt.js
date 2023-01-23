@@ -1176,11 +1176,11 @@ var Gantt = (function () {
                 pElm.style.alignItems = 'center';
 
                 if (
-                    typeof this.options.labelStyle === 'object' &&
-                    this.options.labelStyle !== null
+                    typeof task.labelStyle === 'object' &&
+                    task.labelStyle !== null
                 ) {
-                    Object.keys(this.options.labelStyle).forEach((style) => {
-                        pElm.style[style] = this.options.labelStyle[style];
+                    Object.keys(task.labelStyle).forEach((style) => {
+                        pElm.style[style] = task.labelStyle[style];
                     });
                 }
                 if (task.hasChildren) {
