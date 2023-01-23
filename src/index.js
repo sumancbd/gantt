@@ -293,7 +293,7 @@ export default class Gantt {
             return task;
         });
 
-        this.tasksFiltered = this.tasks.filter((item) => item.show);
+        this.tasksFiltered = this.tasks;
 
         this.setup_dependencies();
     }
