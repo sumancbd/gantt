@@ -1156,18 +1156,20 @@ var Gantt = (function () {
                 iconElem.style.border = 'none';
                 iconElem.style.backgroundColor = 'transparent';
                 iconElem.addEventListener('click', (e) => {
-                    console.log('e', e);
                     e.stopPropagation();
-                    const mTaskIndex = this.tasks.findIndex(
-                        (i) => i.id === task.id
+                    this.options.on_click_expand_toggle(
+                        this.tasks.find((i) => i.id === task.id)
                     );
-                    this.tasks[mTaskIndex].collapsed =
-                        !this.tasks[mTaskIndex].collapsed;
-                    if (this.tasks[mTaskIndex].collapsed) {
-                        this.collapseChild(task.id);
-                    } else {
-                        this.expandChild(task.id);
-                    }
+                    // const mTaskIndex = this.tasks.findIndex(
+                    //     (i) => i.id === task.id
+                    // );
+                    // this.tasks[mTaskIndex].collapsed =
+                    //     !this.tasks[mTaskIndex].collapsed;
+                    // if (this.tasks[mTaskIndex].collapsed) {
+                    //     this.collapseChild(task.id);
+                    // } else {
+                    //     this.expandChild(task.id);
+                    // }
                 });
                 const textElem = document.createElement('span');
                 iconElem.innerHTML = task.collapsed
