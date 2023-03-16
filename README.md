@@ -38,6 +38,7 @@ var tasks = [
     progress: 20,
     dependencies: 'Task 2, Task 3',
     custom_class: 'bar-milestone' // optional
+    fill_color: 'red'
   },
   ...
 ]

@@ -544,6 +544,7 @@ var Gantt = (function () {
                 ry: this.corner_radius,
                 class: 'bar',
                 append_to: this.bar_group,
+                style: this.task.style,
             });
 
             animateSVG(this.$bar, 'width', 0, this.width);
