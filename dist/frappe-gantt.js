@@ -535,27 +535,62 @@ var Gantt = (function () {
         }
 
         draw_bar() {
-            this.$bar = createSVG('rect', {
-                x: this.x,
-                y: this.y,
-                width: this.width,
-                height: this.height,
-                rx: this.corner_radius,
-                ry: this.corner_radius,
-                class: 'bar',
-                append_to: this.bar_group,
-                style: this.task.style,
-            });
+            if (this.task.type === 'release') {
+                const svg = createSVG('svg', {
+                    x: this.x,
+                    y: this.y,
+                    width: this.width,
+                    height: this.height,
+                    append_to: this.bar_group,
+                });
+                createSVG('polygon', {
+                    x: this.x,
+                    y: this.y,
+                    width: this.width,
+                    height: this.height,
+                    append_to: svg,
+                    points: `0,0 0,${this.height} 10,${this.height / 2} ${
+                    this.width - 10
+                },${this.height / 2} ${this.width},${this.height} ${
+                    this.width
+                },0`,
+                    style: 'fill:#767676;stroke:#767676;stroke-width:1;fill-rule:evenodd;',
+                });
 
-            animateSVG(this.$bar, 'width', 0, this.width);
+                this.$bar = svg;
+                animateSVG(this.$bar, 'width', 0, this.width);
 
-            if (this.invalid) {
-                this.$bar.classList.add('bar-invalid');
+                if (this.invalid) {
+                    if (this.task.type !== 'release')
+                        this.$bar.classList.add('bar-invalid');
+                }
+            } else {
+                this.$bar = createSVG('rect', {
+                    x: this.x,
+                    y: this.y,
+                    width: this.width,
+                    height: this.height,
+                    rx: this.corner_radius,
+                    ry: this.corner_radius,
+                    class: 'bar',
+                    append_to: this.bar_group,
+                    style: this.task.style,
+                });
+
+                animateSVG(this.$bar, 'width', 0, this.width);
+
+                if (this.invalid) {
+                    this.$bar.classList.add('bar-invalid');
+                }
             }
         }
 
         draw_progress_bar() {
+            if (this.task.type && this.task.type === 'release') {
+                this.invalid = true;
+            }
             if (this.invalid) return;
+
             this.$bar_progress = createSVG('rect', {
                 x: this.x,
                 y: this.y,
@@ -1153,7 +1188,7 @@ var Gantt = (function () {
 
                 const pElm = document.createElement('p');
                 const iconElem = document.createElement('button');
-                if (task.hasChildren) {
+                if (task.hasChildren && task.type !== 'release') {
                     iconElem.style.cursor = 'pointer';
                     iconElem.style.border = 'none';
                     iconElem.style.backgroundColor = 'transparent';
@@ -1186,7 +1221,7 @@ var Gantt = (function () {
                         pElm.style[style] = task.labelStyle[style];
                     });
                 }
-                if (task.hasChildren) {
+                if (task.hasChildren && task.type !== 'release') {
                     pElm.appendChild(iconElem);
                 }
                 if (task.flagged) {

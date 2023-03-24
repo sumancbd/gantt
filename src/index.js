@@ -123,7 +123,7 @@ export default class Gantt {
 
             const pElm = document.createElement('p');
             const iconElem = document.createElement('button');
-            if (task.hasChildren) {
+            if (task.hasChildren && task.type !== 'release') {
                 iconElem.style.cursor = 'pointer';
                 iconElem.style.border = 'none';
                 iconElem.style.backgroundColor = 'transparent';
@@ -156,7 +156,7 @@ export default class Gantt {
                     pElm.style[style] = task.labelStyle[style];
                 });
             }
-            if (task.hasChildren) {
+            if (task.hasChildren && task.type !== 'release') {
                 pElm.appendChild(iconElem);
             }
             if (task.flagged) {
